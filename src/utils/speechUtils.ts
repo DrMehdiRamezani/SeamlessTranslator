@@ -1,4 +1,3 @@
-
 // Type definitions for Speech Recognition
 interface IWindow extends Window {
   webkitSpeechRecognition: any;
@@ -107,15 +106,59 @@ export const speakText = (text: string, language: string) => {
   });
 };
 
-// Simple translation API - in a real application, this would connect to a translation service
-// For now, we'll just use a few hardcoded phrases to demonstrate functionality
+// Translation using LibreTranslate API
 export const translateText = async (
   text: string, 
   from: 'en' | 'fa'
 ): Promise<string> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
+  if (!text.trim()) {
+    return '';
+  }
   
+  // Map our language codes to LibreTranslate format
+  const sourceLang = from === 'fa' ? 'fa' : 'en';
+  const targetLang = from === 'fa' ? 'en' : 'fa';
+  
+  console.log(`Translating "${text}" from ${sourceLang} to ${targetLang}`);
+  
+  try {
+    // First try the LibreTranslate API
+    const response = await fetch('https://libretranslate.de/translate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        q: text,
+        source: sourceLang,
+        target: targetLang,
+        format: 'text'
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`LibreTranslate API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (data.translatedText) {
+      console.log(`Translation successful: "${data.translatedText}"`);
+      return data.translatedText;
+    } else {
+      throw new Error('Translation response did not contain translated text');
+    }
+  } catch (error) {
+    console.error('Translation API error:', error);
+    
+    // Fallback to our dictionary for basic phrases if API fails
+    console.log('Falling back to dictionary translation');
+    return fallbackTranslation(text, from);
+  }
+};
+
+// Simple fallback dictionary translation - keep our original dictionary as backup
+const fallbackTranslation = (text: string, from: 'en' | 'fa'): string => {
   const persianToEnglish: Record<string, string> = {
     'سلام': 'Hello',
     'چطوری': 'How are you',
@@ -164,19 +207,16 @@ export const translateText = async (
     'The weather is cloudy': 'هوا ابری است'
   };
   
-  console.log(`Attempting to translate: "${text}" from ${from}`);
-  
-  // In a real app, you would connect to a translation API here
   if (from === 'fa') {
-    // First try direct matching
+    // Try direct matching
     if (persianToEnglish[text]) {
       return persianToEnglish[text];
     }
     
-    // Try to normalize text by removing some common characters
+    // Try normalized text
     const normalizedText = text.trim()
-      .replace(/\s+/g, ' ')  // Replace multiple spaces with a single space
-      .replace(/[،؛؟]/g, ''); // Remove Persian punctuation
+      .replace(/\s+/g, ' ')
+      .replace(/[،؛؟]/g, '');
     
     if (persianToEnglish[normalizedText]) {
       return persianToEnglish[normalizedText];
@@ -185,7 +225,6 @@ export const translateText = async (
     // Check for partial matches
     for (const [persian, english] of Object.entries(persianToEnglish)) {
       if (normalizedText.includes(persian)) {
-        console.log(`Found partial match: "${persian}" in "${normalizedText}"`);
         return english;
       }
     }
@@ -195,13 +234,12 @@ export const translateText = async (
     if (words.length > 0) {
       for (const word of words) {
         if (persianToEnglish[word]) {
-          console.log(`Found word match: "${word}" in "${normalizedText}"`);
           return persianToEnglish[word];
         }
       }
     }
     
-    // If no match found
+    // If no match found in dictionary
     return `[Translation not available for: ${text}]`;
   } else {
     // English to Persian translation follows the same pattern
@@ -227,12 +265,11 @@ export const translateText = async (
     // Check for partial matches (case insensitive)
     for (const [english, persian] of Object.entries(englishToPersian)) {
       if (normalizedText.toLowerCase().includes(english.toLowerCase())) {
-        console.log(`Found partial match: "${english}" in "${normalizedText}"`);
         return persian;
       }
     }
     
-    // If no match found
+    // If no match found in dictionary
     return `[ترجمه برای: ${text} موجود نیست]`;
   }
 };

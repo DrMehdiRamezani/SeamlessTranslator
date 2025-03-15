@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Volume2, Send, Copy, CheckCircle2 } from 'lucide-react';
+import { Volume2, Send, Copy, CheckCircle2, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import MicrophoneButton from './MicrophoneButton';
 import { LANGUAGE_CODES, speakText, startSpeechRecognition, translateText } from '@/utils/speechUtils';
@@ -143,7 +143,19 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
     
     try {
       setIsTranslating(true);
+      
+      // Show toast for long translations to indicate processing
+      let toastId;
+      const translationTimeout = setTimeout(() => {
+        toastId = toast({
+          title: "Translation in progress",
+          description: "Translating longer text may take a moment...",
+          duration: 3000,
+        }).id;
+      }, 1000);
+      
       const translatedText = await translateText(textToUse, from);
+      clearTimeout(translationTimeout);
       
       // Add to history
       const newItem: TranslationItemProps = {
@@ -158,7 +170,6 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
       
       // Auto-play the translation with proper language code
       const targetLanguage = from === 'en' ? LANGUAGE_CODES.PERSIAN : LANGUAGE_CODES.ENGLISH;
-      console.log('Speaking translation in language:', targetLanguage);
       handleSpeak(translatedText, targetLanguage);
       
       // Only clear input if we're translating from the input field
@@ -231,17 +242,32 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
             <button
               className={cn(
                 "rounded-full w-12 h-12 flex items-center justify-center shadow-sm",
-                isTranslating ? "animate-pulse-subtle bg-green-400" : "bg-green-500 hover:bg-green-600",
+                isTranslating ? "bg-green-500" : "bg-green-500 hover:bg-green-600",
                 !inputText.trim() && "opacity-50 cursor-not-allowed"
               )}
               onClick={() => handleTranslate()}
               disabled={isTranslating || !inputText.trim()}
               aria-label="Translate text"
             >
-              <Send className="w-5 h-5 text-white" />
+              {isTranslating ? (
+                <Loader2 className="w-5 h-5 text-white animate-spin" />
+              ) : (
+                <Send className="w-5 h-5 text-white" />
+              )}
             </button>
           </div>
         </div>
+      </div>
+      
+      {/* Translation API Indicator */}
+      <div className="text-xs text-gray-500 mb-2 flex items-center">
+        <span>Powered by LibreTranslate API</span>
+        {isTranslating && (
+          <span className="ml-2 flex items-center">
+            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+            Translating...
+          </span>
+        )}
       </div>
       
       {/* History */}
