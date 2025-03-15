@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Volume2, RefreshCw, Copy, CheckCircle2 } from 'lucide-react';
+import { Volume2, Send, Copy, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import MicrophoneButton from './MicrophoneButton';
 import { LANGUAGE_CODES, speakText, startSpeechRecognition, translateText } from '@/utils/speechUtils';
@@ -148,6 +148,7 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
       setHistory(prev => [...prev, newItem]);
       
       // Auto-play the translation
+      // Fix: Make sure we're using the correct language code for the target language
       handleSpeak(translatedText, from === 'en' ? LANGUAGE_CODES.PERSIAN : LANGUAGE_CODES.ENGLISH);
       
       // Clear input
@@ -217,15 +218,15 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
             <button
               className={cn(
                 "rounded-full w-12 h-12 flex items-center justify-center",
-                isTranslating ? "animate-pulse-subtle" : "bg-secondary hover:bg-secondary/80",
+                isTranslating ? "animate-pulse-subtle" : "bg-green-500 hover:bg-green-600",
                 !inputText.trim() && "opacity-50 cursor-not-allowed"
               )}
               onClick={handleTranslate}
               disabled={isTranslating || !inputText.trim()}
               aria-label="Translate text"
             >
-              <RefreshCw className={cn(
-                "w-5 h-5 text-primary",
+              <Send className={cn(
+                "w-5 h-5 text-white",
                 isTranslating && "animate-spin"
               )} />
             </button>
