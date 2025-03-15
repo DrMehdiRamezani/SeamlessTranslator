@@ -15,7 +15,8 @@ export const LANGUAGE_CODES = {
 export const startSpeechRecognition = (
   language: string,
   onResult: (text: string) => void,
-  onEnd: () => void
+  onEnd: () => void,
+  onFinalResult?: (text: string) => void
 ) => {
   const windowWithSpeech = window as unknown as IWindow;
   const SpeechRecognition = windowWithSpeech.SpeechRecognition || windowWithSpeech.webkitSpeechRecognition;
@@ -35,6 +36,11 @@ export const startSpeechRecognition = (
     const resultIndex = event.resultIndex;
     const transcript = event.results[resultIndex][0].transcript;
     onResult(transcript);
+    
+    // Check if this is a final result
+    if (event.results[resultIndex].isFinal && onFinalResult) {
+      onFinalResult(transcript);
+    }
   };
   
   recognition.onerror = (event: any) => {
@@ -65,23 +71,35 @@ export const speakText = (text: string, language: string) => {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = language;
     
-    // Set the voice based on language
+    // Log all available voices for debugging
     const voices = window.speechSynthesis.getVoices();
+    console.log('All available voices:', voices.map(v => `${v.name} (${v.lang})`));
+    
+    // For Persian, we'll try to find any voice with 'fa' in the language code
+    // For English, we'll try to find any voice with 'en' in the language code
+    const langPrefix = language.startsWith('fa') ? 'fa' : 'en';
+    
+    // Find a preferred voice for the language
     const preferredVoice = voices.find(voice => 
-      voice.lang.includes(language.split('-')[0]) && !voice.name.includes('Google')
-    ) || voices.find(voice => 
-      voice.lang.includes(language.split('-')[0])
+      voice.lang.includes(langPrefix)
     );
     
     if (preferredVoice) {
+      console.log(`Using voice: ${preferredVoice.name} (${preferredVoice.lang})`);
       utterance.voice = preferredVoice;
+    } else {
+      console.log(`No specific voice found for ${language}, using default`);
     }
+    
+    utterance.rate = 1.0;  // Normal speed
+    utterance.pitch = 1.0; // Normal pitch
     
     utterance.onend = () => {
       resolve();
     };
     
     utterance.onerror = (err) => {
+      console.error('TTS error:', err);
       reject(err);
     };
     
