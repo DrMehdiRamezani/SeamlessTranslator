@@ -127,6 +127,17 @@ export const translateText = async (
     'نه': 'No',
     'لطفا': 'Please',
     'ببخشید': 'Excuse me',
+    'هوا': 'Weather',
+    'سرد': 'Cold',
+    'هوا سرد است': 'The weather is cold',
+    'گرم': 'Hot',
+    'هوا گرم است': 'The weather is hot',
+    'باران': 'Rain',
+    'باران می‌بارد': 'It is raining',
+    'آفتابی': 'Sunny',
+    'هوا آفتابی است': 'The weather is sunny',
+    'ابری': 'Cloudy',
+    'هوا ابری است': 'The weather is cloudy'
   };
   
   const englishToPersian: Record<string, string> = {
@@ -140,33 +151,83 @@ export const translateText = async (
     'No': 'نه',
     'Please': 'لطفا',
     'Excuse me': 'ببخشید',
+    'Weather': 'هوا',
+    'Cold': 'سرد',
+    'The weather is cold': 'هوا سرد است',
+    'Hot': 'گرم',
+    'The weather is hot': 'هوا گرم است',
+    'Rain': 'باران',
+    'It is raining': 'باران می‌بارد',
+    'Sunny': 'آفتابی',
+    'The weather is sunny': 'هوا آفتابی است',
+    'Cloudy': 'ابری',
+    'The weather is cloudy': 'هوا ابری است'
   };
+  
+  console.log(`Attempting to translate: "${text}" from ${from}`);
   
   // In a real app, you would connect to a translation API here
   if (from === 'fa') {
-    // Return exact match if found
+    // First try direct matching
     if (persianToEnglish[text]) {
       return persianToEnglish[text];
     }
     
+    // Try to normalize text by removing some common characters
+    const normalizedText = text.trim()
+      .replace(/\s+/g, ' ')  // Replace multiple spaces with a single space
+      .replace(/[،؛؟]/g, ''); // Remove Persian punctuation
+    
+    if (persianToEnglish[normalizedText]) {
+      return persianToEnglish[normalizedText];
+    }
+    
     // Check for partial matches
     for (const [persian, english] of Object.entries(persianToEnglish)) {
-      if (text.includes(persian)) {
+      if (normalizedText.includes(persian)) {
+        console.log(`Found partial match: "${persian}" in "${normalizedText}"`);
         return english;
+      }
+    }
+    
+    // Try word by word matching
+    const words = normalizedText.split(' ');
+    if (words.length > 0) {
+      for (const word of words) {
+        if (persianToEnglish[word]) {
+          console.log(`Found word match: "${word}" in "${normalizedText}"`);
+          return persianToEnglish[word];
+        }
       }
     }
     
     // If no match found
     return `[Translation not available for: ${text}]`;
   } else {
-    // Return exact match if found
+    // English to Persian translation follows the same pattern
     if (englishToPersian[text]) {
       return englishToPersian[text];
     }
     
-    // Check for partial matches
+    const normalizedText = text.trim()
+      .replace(/\s+/g, ' ')
+      .replace(/[,.;?!]/g, '');
+    
+    if (englishToPersian[normalizedText]) {
+      return englishToPersian[normalizedText];
+    }
+    
+    // Check for case-insensitive matches
     for (const [english, persian] of Object.entries(englishToPersian)) {
-      if (text.toLowerCase().includes(english.toLowerCase())) {
+      if (normalizedText.toLowerCase() === english.toLowerCase()) {
+        return persian;
+      }
+    }
+    
+    // Check for partial matches (case insensitive)
+    for (const [english, persian] of Object.entries(englishToPersian)) {
+      if (normalizedText.toLowerCase().includes(english.toLowerCase())) {
+        console.log(`Found partial match: "${english}" in "${normalizedText}"`);
         return persian;
       }
     }
