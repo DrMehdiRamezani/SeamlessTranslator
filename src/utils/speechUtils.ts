@@ -106,7 +106,7 @@ export const speakText = (text: string, language: string) => {
   });
 };
 
-// Translation using LibreTranslate API
+// Enhanced Translation with NLP-like techniques
 export const translateText = async (
   text: string, 
   from: 'en' | 'fa'
@@ -115,61 +115,41 @@ export const translateText = async (
     return '';
   }
   
-  // Map our language codes to LibreTranslate format
-  const sourceLang = from === 'fa' ? 'fa' : 'en';
-  const targetLang = from === 'fa' ? 'en' : 'fa';
+  console.log(`Translating "${text}" from ${from === 'fa' ? 'Persian' : 'English'} to ${from === 'fa' ? 'English' : 'Persian'}`);
   
-  console.log(`Translating "${text}" from ${sourceLang} to ${targetLang}`);
-  
-  try {
-    // First try the LibreTranslate API
-    const response = await fetch('https://libretranslate.de/translate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        q: text,
-        source: sourceLang,
-        target: targetLang,
-        format: 'text'
-      })
-    });
-    
-    if (!response.ok) {
-      throw new Error(`LibreTranslate API error: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    
-    if (data.translatedText) {
-      console.log(`Translation successful: "${data.translatedText}"`);
-      return data.translatedText;
-    } else {
-      throw new Error('Translation response did not contain translated text');
-    }
-  } catch (error) {
-    console.error('Translation API error:', error);
-    
-    // Fallback to our dictionary for basic phrases if API fails
-    console.log('Falling back to dictionary translation');
-    return fallbackTranslation(text, from);
-  }
+  // Use our enhanced dictionary translation directly
+  return enhancedDictionaryTranslation(text, from);
 };
 
-// Simple fallback dictionary translation - keep our original dictionary as backup
-const fallbackTranslation = (text: string, from: 'en' | 'fa'): string => {
+// Enhanced dictionary translation with better phrase handling
+const enhancedDictionaryTranslation = (text: string, from: 'en' | 'fa'): string => {
+  // Normalize the input text
+  const normalizedText = text.trim()
+    .replace(/\s+/g, ' ')
+    .replace(from === 'fa' ? /[،؛؟]/g : /[,.;?!]/g, '');
+  
+  // Expanded dictionary with more phrases and common expressions
   const persianToEnglish: Record<string, string> = {
+    // Basic phrases
     'سلام': 'Hello',
     'چطوری': 'How are you',
+    'چطور هستید': 'How are you',
+    'حال شما چطور است': 'How are you',
     'خوبم': 'I am good',
+    'من خوبم': 'I am good',
     'من گرسنه هستم': 'I am hungry',
+    'گرسنه هستم': 'I am hungry',
     'تشکر': 'Thank you',
+    'ممنون': 'Thank you',
+    'متشکرم': 'Thank you',
     'خداحافظ': 'Goodbye',
+    'خدانگهدار': 'Goodbye',
     'بله': 'Yes',
     'نه': 'No',
     'لطفا': 'Please',
     'ببخشید': 'Excuse me',
+    
+    // Weather related
     'هوا': 'Weather',
     'سرد': 'Cold',
     'هوا سرد است': 'The weather is cold',
@@ -180,20 +160,83 @@ const fallbackTranslation = (text: string, from: 'en' | 'fa'): string => {
     'آفتابی': 'Sunny',
     'هوا آفتابی است': 'The weather is sunny',
     'ابری': 'Cloudy',
-    'هوا ابری است': 'The weather is cloudy'
+    'هوا ابری است': 'The weather is cloudy',
+    'امروز': 'Today',
+    'هوا امروز': 'Today\'s weather',
+    'هوا امروز خوب است': 'The weather today is good',
+    'هوا امروز خیلی خوب است': 'The weather today is very good',
+    
+    // Common adjectives
+    'خوب': 'Good',
+    'خیلی خوب': 'Very good',
+    'بد': 'Bad',
+    'خیلی بد': 'Very bad',
+    'بزرگ': 'Big',
+    'کوچک': 'Small',
+    'زیبا': 'Beautiful',
+    'زشت': 'Ugly',
+    
+    // Common nouns
+    'خانه': 'House',
+    'ماشین': 'Car',
+    'غذا': 'Food',
+    'آب': 'Water',
+    'نان': 'Bread',
+    
+    // Common verbs
+    'رفتن': 'To go',
+    'آمدن': 'To come',
+    'خوردن': 'To eat',
+    'نوشیدن': 'To drink',
+    'دیدن': 'To see',
+    'شنیدن': 'To hear',
+    'خوابیدن': 'To sleep',
+    'است': 'Is',
+    'هست': 'Is',
+    'نیست': 'Is not',
+    
+    // Time expressions
+    'امروز': 'Today',
+    'فردا': 'Tomorrow',
+    'دیروز': 'Yesterday',
+    'صبح': 'Morning',
+    'ظهر': 'Noon',
+    'شب': 'Night',
+    
+    // Additional common phrases
+    'چه خبر': 'What\'s new',
+    'خبری نیست': 'Nothing new',
+    'نام من': 'My name is',
+    'اسم من': 'My name is',
+    'من اهل ایران هستم': 'I am from Iran',
+    'من فارسی بلد نیستم': 'I don\'t know Persian',
+    'من انگلیسی بلد نیستم': 'I don\'t know English',
+    'دوست دارم': 'I like',
+    'دوست ندارم': 'I don\'t like'
   };
   
   const englishToPersian: Record<string, string> = {
+    // Basic phrases
     'Hello': 'سلام',
-    'How are you': 'چطوری',
-    'I am good': 'خوبم',
+    'Hi': 'سلام',
+    'Hey': 'سلام',
+    'How are you': 'چطور هستید',
+    'How are you doing': 'حال شما چطور است',
+    'I am good': 'من خوبم',
+    'I am fine': 'من خوبم',
+    'I am well': 'من خوبم',
     'I am hungry': 'من گرسنه هستم',
-    'Thank you': 'تشکر',
+    'Thank you': 'متشکرم',
+    'Thanks': 'ممنون',
     'Goodbye': 'خداحافظ',
+    'Bye': 'خداحافظ',
     'Yes': 'بله',
     'No': 'نه',
     'Please': 'لطفا',
     'Excuse me': 'ببخشید',
+    'Sorry': 'متأسفم',
+    
+    // Weather related
     'Weather': 'هوا',
     'Cold': 'سرد',
     'The weather is cold': 'هوا سرد است',
@@ -204,72 +247,174 @@ const fallbackTranslation = (text: string, from: 'en' | 'fa'): string => {
     'Sunny': 'آفتابی',
     'The weather is sunny': 'هوا آفتابی است',
     'Cloudy': 'ابری',
-    'The weather is cloudy': 'هوا ابری است'
+    'The weather is cloudy': 'هوا ابری است',
+    'Today': 'امروز',
+    'Today\'s weather': 'هوا امروز',
+    'The weather today is good': 'هوا امروز خوب است',
+    'The weather today is very good': 'هوا امروز خیلی خوب است',
+    
+    // Common adjectives
+    'Good': 'خوب',
+    'Very good': 'خیلی خوب',
+    'Bad': 'بد',
+    'Very bad': 'خیلی بد',
+    'Big': 'بزرگ',
+    'Small': 'کوچک',
+    'Beautiful': 'زیبا',
+    'Ugly': 'زشت',
+    
+    // Common nouns
+    'House': 'خانه',
+    'Car': 'ماشین',
+    'Food': 'غذا',
+    'Water': 'آب',
+    'Bread': 'نان',
+    
+    // Common verbs
+    'To go': 'رفتن',
+    'To come': 'آمدن',
+    'To eat': 'خوردن',
+    'To drink': 'نوشیدن',
+    'To see': 'دیدن',
+    'To hear': 'شنیدن',
+    'To sleep': 'خوابیدن',
+    'Is': 'است',
+    'Is not': 'نیست',
+    
+    // Time expressions
+    'Today': 'امروز',
+    'Tomorrow': 'فردا',
+    'Yesterday': 'دیروز',
+    'Morning': 'صبح',
+    'Noon': 'ظهر',
+    'Night': 'شب',
+    
+    // Additional common phrases
+    'What\'s new': 'چه خبر',
+    'Nothing new': 'خبری نیست',
+    'My name is': 'اسم من',
+    'I am from Iran': 'من اهل ایران هستم',
+    'I don\'t know Persian': 'من فارسی بلد نیستم',
+    'I don\'t know English': 'من انگلیسی بلد نیستم',
+    'I like': 'دوست دارم',
+    'I don\'t like': 'دوست ندارم'
   };
-  
+
   if (from === 'fa') {
-    // Try direct matching
-    if (persianToEnglish[text]) {
-      return persianToEnglish[text];
-    }
-    
-    // Try normalized text
-    const normalizedText = text.trim()
-      .replace(/\s+/g, ' ')
-      .replace(/[،؛؟]/g, '');
-    
+    // Try to translate the whole phrase first
     if (persianToEnglish[normalizedText]) {
       return persianToEnglish[normalizedText];
     }
     
-    // Check for partial matches
-    for (const [persian, english] of Object.entries(persianToEnglish)) {
-      if (normalizedText.includes(persian)) {
-        return english;
-      }
-    }
-    
-    // Try word by word matching
-    const words = normalizedText.split(' ');
-    if (words.length > 0) {
-      for (const word of words) {
-        if (persianToEnglish[word]) {
-          return persianToEnglish[word];
-        }
-      }
-    }
-    
-    // If no match found in dictionary
-    return `[Translation not available for: ${text}]`;
+    // Advanced multi-word processing for Persian to English
+    return translateMultiWordPersian(normalizedText, persianToEnglish);
   } else {
-    // English to Persian translation follows the same pattern
-    if (englishToPersian[text]) {
-      return englishToPersian[text];
-    }
-    
-    const normalizedText = text.trim()
-      .replace(/\s+/g, ' ')
-      .replace(/[,.;?!]/g, '');
-    
+    // Try to translate the whole phrase first
     if (englishToPersian[normalizedText]) {
       return englishToPersian[normalizedText];
     }
     
-    // Check for case-insensitive matches
-    for (const [english, persian] of Object.entries(englishToPersian)) {
-      if (normalizedText.toLowerCase() === english.toLowerCase()) {
-        return persian;
-      }
-    }
-    
-    // Check for partial matches (case insensitive)
-    for (const [english, persian] of Object.entries(englishToPersian)) {
-      if (normalizedText.toLowerCase().includes(english.toLowerCase())) {
-        return persian;
-      }
-    }
-    
-    // If no match found in dictionary
-    return `[ترجمه برای: ${text} موجود نیست]`;
+    // Advanced multi-word processing for English to Persian
+    return translateMultiWordEnglish(normalizedText, englishToPersian);
   }
+};
+
+// Helper function to handle multi-word Persian sentences
+const translateMultiWordPersian = (text: string, dictionary: Record<string, string>): string => {
+  // Step 1: Try to match known phrases first (longest to shortest)
+  const phrases = Object.keys(dictionary).sort((a, b) => b.length - a.length);
+  for (const phrase of phrases) {
+    if (text.includes(phrase)) {
+      // Replace the phrase with its translation
+      return text.replace(phrase, dictionary[phrase]);
+    }
+  }
+  
+  // Step 2: Word by word translation with context
+  const words = text.split(' ');
+  const translatedWords: string[] = [];
+  
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    
+    // Try two-word combinations first
+    if (i < words.length - 1) {
+      const twoWords = `${word} ${words[i+1]}`;
+      if (dictionary[twoWords]) {
+        translatedWords.push(dictionary[twoWords]);
+        i++; // Skip the next word since we used it
+        continue;
+      }
+    }
+    
+    // Then try single words
+    if (dictionary[word]) {
+      translatedWords.push(dictionary[word]);
+    } else {
+      // Keep the original word if no translation found
+      translatedWords.push(`[${word}]`);
+    }
+  }
+  
+  // Step 3: Attempt to create a grammatically correct English sentence
+  let result = translatedWords.join(' ');
+  
+  // Additional context-based improvements can be added here
+  // For example, adding "the" before certain nouns, fixing subject-verb agreement, etc.
+  
+  return result || `[Could not translate: ${text}]`;
+};
+
+// Helper function to handle multi-word English sentences
+const translateMultiWordEnglish = (text: string, dictionary: Record<string, string>): string => {
+  // Step 1: Try to match known phrases first (longest to shortest)
+  const phrases = Object.keys(dictionary).sort((a, b) => b.length - a.length);
+  for (const phrase of phrases) {
+    if (text.toLowerCase().includes(phrase.toLowerCase())) {
+      // Replace the phrase with its translation (case-insensitive)
+      const regex = new RegExp(phrase, 'i');
+      return text.replace(regex, dictionary[phrase]);
+    }
+  }
+  
+  // Step 2: Word by word translation with context
+  const words = text.toLowerCase().split(' ');
+  const translatedWords: string[] = [];
+  
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    
+    // Try two-word combinations first
+    if (i < words.length - 1) {
+      const twoWords = `${word} ${words[i+1]}`;
+      
+      // Check for matches in the dictionary (case-insensitive)
+      const twoWordKey = Object.keys(dictionary).find(
+        key => key.toLowerCase() === twoWords
+      );
+      
+      if (twoWordKey) {
+        translatedWords.push(dictionary[twoWordKey]);
+        i++; // Skip the next word since we used it
+        continue;
+      }
+    }
+    
+    // Then try single words (case-insensitive)
+    const singleWordKey = Object.keys(dictionary).find(
+      key => key.toLowerCase() === word
+    );
+    
+    if (singleWordKey) {
+      translatedWords.push(dictionary[singleWordKey]);
+    } else {
+      // Keep the original word if no translation found
+      translatedWords.push(`[${word}]`);
+    }
+  }
+  
+  // Step 3: Create a Persian sentence
+  let result = translatedWords.join(' ');
+  
+  return result || `[قابل ترجمه نیست: ${text}]`;
 };

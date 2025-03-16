@@ -144,7 +144,7 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
     try {
       setIsTranslating(true);
       
-      // Show toast for long translations to indicate processing
+      // Show toast for longer translations to indicate processing
       let toastId;
       const translationTimeout = setTimeout(() => {
         toastId = toast({
@@ -261,7 +261,7 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
       
       {/* Translation API Indicator */}
       <div className="text-xs text-gray-500 mb-2 flex items-center">
-        <span>Powered by LibreTranslate API</span>
+        <span>Using enhanced dictionary translation</span>
         {isTranslating && (
           <span className="ml-2 flex items-center">
             <Loader2 className="w-3 h-3 mr-1 animate-spin" />
