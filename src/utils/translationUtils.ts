@@ -1,6 +1,6 @@
 import { persianToEnglish, englishToPersian } from './translationDictionaries';
 
-// Enhanced Translation with NLP-like techniques
+// Enhanced Translation with LibreTranslate API
 export const translateText = async (
   text: string, 
   from: 'en' | 'fa'
@@ -9,10 +9,45 @@ export const translateText = async (
     return '';
   }
   
-  console.log(`Translating "${text}" from ${from === 'fa' ? 'Persian' : 'English'} to ${from === 'fa' ? 'English' : 'Persian'}`);
+  const sourceLanguage = from === 'fa' ? 'fa' : 'en';
+  const targetLanguage = from === 'fa' ? 'en' : 'fa';
   
-  // Use our enhanced dictionary translation directly
-  return enhancedDictionaryTranslation(text, from);
+  console.log(`Translating "${text}" from ${from === 'fa' ? 'Persian' : 'English'} to ${from === 'fa' ? 'English' : 'Persian'} using LibreTranslate`);
+  
+  try {
+    // Use the local LibreTranslate server
+    const response = await fetch('http://localhost:5000/translate', {
+      method: 'POST',
+      body: JSON.stringify({
+        q: text,
+        source: sourceLanguage,
+        target: targetLanguage,
+        format: 'text',
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('LibreTranslate API error:', errorText, 'Status:', response.status);
+      throw new Error(`Translation failed: ${response.status} ${errorText}`);
+    }
+    
+    const data = await response.json();
+    console.log('LibreTranslate API response:', data);
+    
+    if (data.translatedText) {
+      return data.translatedText;
+    } else {
+      console.error('Unexpected API response format:', data);
+      throw new Error('Unexpected API response format');
+    }
+  } catch (error) {
+    console.error('Translation error:', error);
+    return `[Translation error: ${error instanceof Error ? error.message : String(error)}]`;
+  }
 };
 
 // Enhanced dictionary translation with better phrase handling

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Volume2, Send, Copy, CheckCircle2, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -98,7 +97,6 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const historyContainerRef = useRef<HTMLDivElement>(null);
 
-  // Scroll history to bottom when new items are added
   useEffect(() => {
     if (historyContainerRef.current) {
       historyContainerRef.current.scrollTop = historyContainerRef.current.scrollHeight;
@@ -107,7 +105,6 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
 
   const handleMicrophoneToggle = () => {
     if (isListening) {
-      // Stop listening
       if (recognitionRef.current) {
         recognitionRef.current.stop();
         recognitionRef.current = null;
@@ -115,7 +112,6 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
       setIsListening(false);
       setActiveMicrophone(null);
     } else {
-      // Start listening
       setActiveMicrophone(id);
       setIsListening(true);
       
@@ -128,10 +124,8 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
           setIsListening(false);
           setActiveMicrophone(null);
         },
-        // Add a callback for final results that triggers translation
         (finalText) => {
           setInputText(finalText);
-          // Automatically translate when speech recognition is complete
           if (finalText.trim()) {
             handleTranslate(finalText);
           }
@@ -149,7 +143,6 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
     try {
       setIsTranslating(true);
       
-      // Show toast for longer translations to indicate processing
       let toastId;
       const translationTimeout = setTimeout(() => {
         toastId = toast({
@@ -162,7 +155,6 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
       const translatedText = await translateText(textToUse, from);
       clearTimeout(translationTimeout);
       
-      // Add to history
       const newItem: TranslationItemProps = {
         text: textToUse,
         translation: translatedText,
@@ -173,16 +165,13 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
       
       setHistory(prev => [...prev, newItem]);
       
-      // Auto-play the translation with proper language code
       const targetLanguage = from === 'en' ? LANGUAGE_CODES.PERSIAN : LANGUAGE_CODES.ENGLISH;
       handleSpeak(translatedText, targetLanguage);
       
-      // Only clear input if we're translating from the input field
       if (textToTranslate === inputText) {
         setInputText('');
       }
       
-      // Focus input field for next translation
       if (inputRef.current) {
         inputRef.current.focus();
       }
@@ -212,7 +201,6 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
 
   return (
     <div className="flex flex-col h-full relative">
-      {/* Header */}
       <div className="mb-4">
         <div className="inline-block px-3 py-1 bg-secondary rounded-full mb-2">
           <span className="text-xs font-medium text-primary">{title}</span>
@@ -220,7 +208,6 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
         <h2 className="text-2xl font-semibold">{from === 'en' ? 'English to Persian' : 'Persian to English'}</h2>
       </div>
       
-      {/* Input Area */}
       <div className="glass p-4 rounded-xl mb-4">
         <div className="flex space-x-4">
           <div className="flex-1">
@@ -264,9 +251,8 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
         </div>
       </div>
       
-      {/* Translation API Indicator */}
       <div className="text-xs text-gray-500 mb-2 flex items-center">
-        <span>Using enhanced dictionary translation</span>
+        <span>Using LibreTranslate API (localhost:5000)</span>
         {isTranslating && (
           <span className="ml-2 flex items-center">
             <Loader2 className="w-3 h-3 mr-1 animate-spin" />
@@ -275,7 +261,6 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
         )}
       </div>
       
-      {/* History */}
       <div className="text-sm font-medium text-gray-500 mb-2">Translation History</div>
       <div 
         ref={historyContainerRef}
