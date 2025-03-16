@@ -1,74 +1,20 @@
+
 import React, { useState, useRef, useEffect } from 'react';
-import { Volume2, Send, Copy, CheckCircle2, Loader2 } from 'lucide-react';
+import { Send, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import MicrophoneButton from './MicrophoneButton';
-import { 
-  LANGUAGE_CODES, 
-  speakText, 
-  startSpeechRecognition, 
-  translateText 
-} from '@/utils/speechUtils';
-import { toast } from '@/components/ui/use-toast';
+import TranslationItem from './TranslationItem';
+import { LANGUAGE_CODES } from '@/utils/speechUtils';
+import { useTranslation } from '@/hooks/useTranslation';
+import { useSpeech } from '@/hooks/useSpeech';
 
-interface TranslationItemProps {
+// Define the interface for each translation history item
+interface TranslationHistoryItem {
   text: string;
   translation: string;
   timestamp: Date;
   from: 'en' | 'fa';
-  onSpeak: (text: string, lang: string) => void;
 }
-
-const TranslationItem: React.FC<TranslationItemProps> = ({ 
-  text, 
-  translation, 
-  timestamp, 
-  from,
-  onSpeak
-}) => {
-  const [copied, setCopied] = useState(false);
-  
-  const copyToClipboard = (content: string) => {
-    navigator.clipboard.writeText(content);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <div className="bg-white rounded-xl p-4 shadow-subtle mb-3 animate-fade-in">
-      <div className="flex justify-between items-start mb-2">
-        <span className="text-xs text-gray-400">
-          {timestamp.toLocaleTimeString()} · {timestamp.toLocaleDateString()}
-        </span>
-        <div className="flex space-x-1">
-          <button 
-            onClick={() => copyToClipboard(translation)}
-            className="p-1 rounded-full hover:bg-gray-100"
-            aria-label="Copy translation"
-          >
-            {copied ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4 text-gray-400" />}
-          </button>
-          <button 
-            onClick={() => onSpeak(translation, from === 'en' ? LANGUAGE_CODES.PERSIAN : LANGUAGE_CODES.ENGLISH)}
-            className="p-1 rounded-full hover:bg-gray-100"
-            aria-label="Speak translation"
-          >
-            <Volume2 className="h-4 w-4 text-gray-400" />
-          </button>
-        </div>
-      </div>
-      
-      <div className={cn("mb-2", from === 'fa' ? "persian" : "")}>
-        <p className="font-medium">{text}</p>
-      </div>
-      
-      <div className="border-t border-gray-100 pt-2 mt-2">
-        <div className={cn("text-gray-700", from === 'en' ? "persian" : "")}>
-          <p>{translation}</p>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 interface TranslationPanelProps {
   title: string;
@@ -90,12 +36,13 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
   id
 }) => {
   const [inputText, setInputText] = useState('');
-  const [isTranslating, setIsTranslating] = useState(false);
-  const [isListening, setIsListening] = useState(false);
-  const [history, setHistory] = useState<TranslationItemProps[]>([]);
-  const recognitionRef = useRef<any>(null);
+  const [history, setHistory] = useState<TranslationHistoryItem[]>([]);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const historyContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Custom hooks
+  const { translate, isTranslating } = useTranslation();
+  const { isListening, startListening, stopListening, speak } = useSpeech(from, setInputText);
 
   useEffect(() => {
     if (historyContainerRef.current) {
@@ -103,36 +50,22 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
     }
   }, [history]);
 
+  // Handle key press events
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    // If the Enter key is pressed without Shift, trigger translation
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault(); // Prevent newline in textarea
+      if (inputText.trim() && !isTranslating) {
+        handleTranslate();
+      }
+    }
+  };
+
   const handleMicrophoneToggle = () => {
     if (isListening) {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-        recognitionRef.current = null;
-      }
-      setIsListening(false);
-      setActiveMicrophone(null);
+      stopListening(setActiveMicrophone);
     } else {
-      setActiveMicrophone(id);
-      setIsListening(true);
-      
-      const recognition = startSpeechRecognition(
-        from === 'en' ? LANGUAGE_CODES.ENGLISH : LANGUAGE_CODES.PERSIAN,
-        (text) => {
-          setInputText(text);
-        },
-        () => {
-          setIsListening(false);
-          setActiveMicrophone(null);
-        },
-        (finalText) => {
-          setInputText(finalText);
-          if (finalText.trim()) {
-            handleTranslate(finalText);
-          }
-        }
-      );
-      
-      recognitionRef.current = recognition;
+      startListening(id, setActiveMicrophone);
     }
   };
 
@@ -140,33 +73,20 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
     const textToUse = textToTranslate.trim() || inputText.trim();
     if (!textToUse) return;
     
-    try {
-      setIsTranslating(true);
-      
-      let toastId;
-      const translationTimeout = setTimeout(() => {
-        toastId = toast({
-          title: "Translation in progress",
-          description: "Translating longer text may take a moment...",
-          duration: 3000,
-        }).id;
-      }, 1000);
-      
-      const translatedText = await translateText(textToUse, from);
-      clearTimeout(translationTimeout);
-      
-      const newItem: TranslationItemProps = {
+    const translatedText = await translate(textToUse, from);
+    
+    if (translatedText) {
+      const newItem: TranslationHistoryItem = {
         text: textToUse,
         translation: translatedText,
         timestamp: new Date(),
         from,
-        onSpeak: handleSpeak
       };
       
       setHistory(prev => [...prev, newItem]);
       
       const targetLanguage = from === 'en' ? LANGUAGE_CODES.PERSIAN : LANGUAGE_CODES.ENGLISH;
-      handleSpeak(translatedText, targetLanguage);
+      speak(translatedText, targetLanguage);
       
       if (textToTranslate === inputText) {
         setInputText('');
@@ -175,28 +95,7 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
       if (inputRef.current) {
         inputRef.current.focus();
       }
-    } catch (error) {
-      console.error('Translation error:', error);
-      toast({
-        title: "Translation failed",
-        description: "An error occurred while translating. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsTranslating(false);
     }
-  };
-
-  const handleSpeak = (text: string, language: string) => {
-    console.log('Attempting to speak text:', text, 'in language:', language);
-    speakText(text, language).catch(error => {
-      console.error('Text-to-speech error:', error);
-      toast({
-        title: "Speech playback failed",
-        description: "An error occurred during text-to-speech playback.",
-        variant: "destructive"
-      });
-    });
   };
 
   return (
@@ -220,6 +119,7 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
               placeholder={placeholderText}
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
+              onKeyDown={handleKeyDown}
               dir={isRightToLeft ? "rtl" : "ltr"}
             />
           </div>
@@ -275,7 +175,11 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
           history.map((item, index) => (
             <TranslationItem
               key={index}
-              {...item}
+              text={item.text}
+              translation={item.translation}
+              timestamp={item.timestamp}
+              from={item.from}
+              onSpeak={speak}
             />
           ))
         )}
