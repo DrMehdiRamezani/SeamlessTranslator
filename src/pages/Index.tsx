@@ -70,13 +70,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <header className="text-center mb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 py-4">
+        <header className="text-center mb-4">
           <h1 className="text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-500">
             Persian-English Translator
           </h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Seamlessly translate between Persian and English with text and voice input.
             Click the microphone to speak or type directly in the text box.
           </p>
         </header>

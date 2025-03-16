@@ -104,7 +104,7 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
         <div className="inline-block px-3 py-1 bg-secondary rounded-full mb-2">
           <span className="text-xs font-medium text-primary">{title}</span>
         </div>
-        <h2 className="text-2xl font-semibold">{from === 'en' ? 'English to Persian' : 'Persian to English'}</h2>
+        <h2 className="text-2xl font-semibold">{from === 'en' ? 'English to Persian' : 'فارسی به انگلیسی'}</h2>
       </div>
       
       <div className="glass p-4 rounded-xl mb-4">
@@ -152,7 +152,6 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
       </div>
       
       <div className="text-xs text-gray-500 mb-2 flex items-center">
-        <span>Using LibreTranslate API (localhost:5000)</span>
         {isTranslating && (
           <span className="ml-2 flex items-center">
             <Loader2 className="w-3 h-3 mr-1 animate-spin" />
