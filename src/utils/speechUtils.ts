@@ -196,7 +196,6 @@ const enhancedDictionaryTranslation = (text: string, from: 'en' | 'fa'): string 
     'نیست': 'Is not',
     
     // Time expressions
-    'امروز': 'Today',
     'فردا': 'Tomorrow',
     'دیروز': 'Yesterday',
     'صبح': 'Morning',
@@ -282,7 +281,6 @@ const enhancedDictionaryTranslation = (text: string, from: 'en' | 'fa'): string 
     'Is not': 'نیست',
     
     // Time expressions
-    'Today': 'امروز',
     'Tomorrow': 'فردا',
     'Yesterday': 'دیروز',
     'Morning': 'صبح',
