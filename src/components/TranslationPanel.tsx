@@ -3,7 +3,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Volume2, Send, Copy, CheckCircle2, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import MicrophoneButton from './MicrophoneButton';
-import { LANGUAGE_CODES, speakText, startSpeechRecognition, translateText } from '@/utils/speechUtils';
+import { 
+  LANGUAGE_CODES, 
+  speakText, 
+  startSpeechRecognition, 
+  translateText 
+} from '@/utils/speechUtils';
 import { toast } from '@/components/ui/use-toast';
 
 interface TranslationItemProps {
