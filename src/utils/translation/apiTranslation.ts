@@ -33,6 +33,10 @@ export const translateText = async (
     };
     
     console.log(`[Translation] Request payload:`, requestBody);
+
+    // Create an AbortController to handle timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
     
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -41,8 +45,12 @@ export const translateText = async (
         'Content-Type': 'application/json',
         'Origin': window.location.origin,
       },
-      credentials: 'omit' // Important for CORS
+      credentials: 'omit', // Important for CORS
+      signal: controller.signal, // Add abort signal
     });
+    
+    // Clear the timeout as we got a response
+    clearTimeout(timeoutId);
     
     console.log(`[Translation] Response status:`, response.status);
     
@@ -73,6 +81,12 @@ export const translateText = async (
     }
   } catch (error) {
     console.error('[Translation] Error during translation:', error);
+    
+    // Handle timeout errors explicitly
+    if (error.name === 'AbortError') {
+      console.error('[Translation] Request timed out after 8 seconds');
+      return `[Translation error: Request timed out. The server may be overloaded or unavailable.]`;
+    }
     
     // Handle network errors more gracefully
     if (error instanceof TypeError && error.message.includes('fetch')) {
