@@ -16,7 +16,13 @@ export const translateText = async (
   console.log(`[Translation] Request: "${text}" (${text.length} chars) from ${sourceLanguage} to ${targetLanguage}`);
   
   try {
-    console.log(`[Translation] Sending request to LibreTranslate API at http://localhost:5000/translate`);
+    // Get the current hostname dynamically
+    const hostname = window.location.hostname;
+    const apiUrl = hostname === 'localhost' 
+      ? 'http://localhost:5000/translate'
+      : `http://${hostname}:5000/translate`;
+    
+    console.log(`[Translation] Sending request to LibreTranslate API at ${apiUrl}`);
     
     const requestBody = {
       q: text,
@@ -27,13 +33,14 @@ export const translateText = async (
     
     console.log(`[Translation] Request payload:`, requestBody);
     
-    // Use the local LibreTranslate server
-    const response = await fetch('http://localhost:5000/translate', {
+    const response = await fetch(apiUrl, {
       method: 'POST',
       body: JSON.stringify(requestBody),
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+        'Origin': window.location.origin,
+      },
+      credentials: 'omit' // Important for CORS
     });
     
     console.log(`[Translation] Response status:`, response.status);
@@ -237,4 +244,3 @@ const translateMultiWordEnglish = (text: string, dictionary: Record<string, stri
   
   return result || `[قابل ترجمه نیست: ${text}]`;
 };
-

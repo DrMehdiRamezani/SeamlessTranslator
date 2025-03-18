@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -8,7 +7,6 @@ import { LANGUAGE_CODES } from '@/utils/speechUtils';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSpeech } from '@/hooks/useSpeech';
 
-// Define the interface for each translation history item
 interface TranslationHistoryItem {
   text: string;
   translation: string;
@@ -40,7 +38,6 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const historyContainerRef = useRef<HTMLDivElement>(null);
   
-  // Custom hooks
   const { translate, isTranslating } = useTranslation();
   const { isListening, startListening, stopListening, speak } = useSpeech(from, setInputText);
 
@@ -50,11 +47,9 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
     }
   }, [history]);
 
-  // Handle key press events
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    // If the Enter key is pressed without Shift, trigger translation
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault(); // Prevent newline in textarea
+      e.preventDefault();
       if (inputText.trim() && !isTranslating) {
         handleTranslate();
       }
@@ -107,7 +102,31 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
         <h2 className="text-2xl font-semibold">{from === 'en' ? 'English to Persian' : 'فارسی به انگلیسی'}</h2>
       </div>
       
-      <div className="glass p-4 rounded-xl mb-4">
+      <div className="text-sm font-medium text-gray-500 mb-2">Translation History</div>
+      <div 
+        ref={historyContainerRef}
+        className="flex-1 overflow-y-auto pb-4 pr-1" 
+        style={{ scrollBehavior: 'smooth' }}
+      >
+        {history.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-center opacity-50">
+            <p className="text-gray-400 italic">Your translations will appear here</p>
+          </div>
+        ) : (
+          [...history].reverse().map((item, index) => (
+            <TranslationItem
+              key={index}
+              text={item.text}
+              translation={item.translation}
+              timestamp={item.timestamp}
+              from={item.from}
+              onSpeak={speak}
+            />
+          ))
+        )}
+      </div>
+      
+      <div className="glass p-4 rounded-xl mt-4">
         <div className="flex space-x-4">
           <div className="flex-1">
             <textarea
@@ -157,30 +176,6 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
             <Loader2 className="w-3 h-3 mr-1 animate-spin" />
             Translating...
           </span>
-        )}
-      </div>
-      
-      <div className="text-sm font-medium text-gray-500 mb-2">Translation History</div>
-      <div 
-        ref={historyContainerRef}
-        className="flex-1 overflow-y-auto pb-4 pr-1" 
-        style={{ scrollBehavior: 'smooth' }}
-      >
-        {history.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center opacity-50">
-            <p className="text-gray-400 italic">Your translations will appear here</p>
-          </div>
-        ) : (
-          history.map((item, index) => (
-            <TranslationItem
-              key={index}
-              text={item.text}
-              translation={item.translation}
-              timestamp={item.timestamp}
-              from={item.from}
-              onSpeak={speak}
-            />
-          ))
         )}
       </div>
     </div>
