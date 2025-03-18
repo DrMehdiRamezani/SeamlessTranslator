@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { translateText } from '@/utils/speechUtils';
+import { translateText } from '@/utils/translation';
 import { toast } from '@/components/ui/use-toast';
 
 export const useTranslation = () => {

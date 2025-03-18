@@ -3,4 +3,4 @@
 export { LANGUAGE_CODES } from './speechTypes';
 export { startSpeechRecognition } from './speechRecognition';
 export { speakText } from './textToSpeech';
-export { translateText } from './translationUtils';
+export { translateText } from './translation';
