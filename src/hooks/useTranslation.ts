@@ -19,12 +19,11 @@ export const useTranslation = () => {
         title: "Translation in progress",
         description: "Translating your text...",
         duration: 2000,
-      }).id;
+      });
       
       // For longer translations (after 2 seconds), update the toast
       const longRunningTimer = setTimeout(() => {
         toast({
-          id: toastId,
           title: "Translation in progress",
           description: "This is taking longer than usual. Please wait...",
           duration: 5000,
@@ -34,7 +33,6 @@ export const useTranslation = () => {
       // For very long translations (after 6 seconds), update again
       const veryLongRunningTimer = setTimeout(() => {
         toast({
-          id: toastId,
           title: "Still translating",
           description: "The translation server might be slow or overloaded.",
           duration: Infinity, // Keep it until we finish or fail
@@ -54,7 +52,6 @@ export const useTranslation = () => {
       if (translationTime > 5000) {
         // Only show completion toast for long translations
         toast({
-          id: toastId,
           title: "Translation complete",
           description: `Translation completed in ${Math.round(translationTime/1000)} seconds`,
           duration: 2000,
@@ -62,7 +59,6 @@ export const useTranslation = () => {
       } else {
         // Just dismiss the existing toast
         toast({
-          id: toastId,
           duration: 0,
         });
       }
