@@ -1,12 +1,29 @@
 # Welcome to  project
 
+ssh -o "ServerAliveInterval 60" <SERVER_ADDRESS>
+
+## install docker on pi
+curl -sSL https://get.docker.com | sh
+sudo usermod -aG docker $USER
+
+to run:
+sudo ./run.sh --host 0.0.0.0 --port 5000 --load-only fa,en
+
+
 ## run the libretranslate 
 1. activate local environment 
-2. libretranslate --host 0.0.0.0 --port 5000 --cors-origins "*"
+2. libretranslate --host 0.0.0.0 --port 5000 #--cors-origins "*"
 
-# 
-to the package.json add: "serve" : "vite preview"
+# the app
+1. clone the rep
+2. install nodejs
+sudo apt install nodejs
+sudo apt install npm
+3. install vite locally
 npm install vite --save-dev
+
+to the package.json add: "serve" : "vite preview"
+
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -16,12 +33,13 @@ npm install vite --save-dev
     "serve" : "vite preview"
   },
 
+4. if errored : uninstall vit. npm uninstall vit
 npm run build
 
 if Vite is installed locally:
-npx vite preview
+    npx vite preview
 if Vite is installed globally
-vite preview
+    vite preview
 finish
 
 ##########
