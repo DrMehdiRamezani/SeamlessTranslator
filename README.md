@@ -4,7 +4,27 @@
 1. activate local environment 
 2. libretranslate --host 0.0.0.0 --port 5000 --cors-origins "*"
 
+# 
+to the package.json add: "serve" : "vite preview"
+npm install vite --save-dev
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:dev": "vite build --mode development",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "serve" : "vite preview"
+  },
 
+npm run build
+
+if Vite is installed locally:
+npx vite preview
+if Vite is installed globally
+vite preview
+finish
+
+##########
 Follow these steps:
 
 ```sh
