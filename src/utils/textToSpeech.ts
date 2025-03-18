@@ -18,7 +18,7 @@ export const speakText = (text: string, language: string) => {
     
     // Log all available voices for debugging
     const voices = window.speechSynthesis.getVoices();
-    console.log('All available voices:', voices.map(v => `${v.name} (${v.lang})`));
+    // console.log('All available voices:', voices.map(v => `${v.name} (${v.lang})`));
     
     // For Persian, we'll try to find any voice with 'fa' in the language code
     // For English, we'll try to find any voice with 'en' in the language code

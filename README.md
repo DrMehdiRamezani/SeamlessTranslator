@@ -1,5 +1,9 @@
 # Welcome to  project
 
+## run the libretranslate 
+1. activate local environment 
+2. libretranslate --host 0.0.0.0 --port 5000 --cors-origins "*"
+
 
 Follow these steps:
 
