@@ -1,86 +1,42 @@
-# Welcome to  project
+# This is the repository for a local website for seamless translation from one to another language.
 
-ssh -o "ServerAliveInterval 60" <SERVER_ADDRESS>
-
-## install docker on pi
-curl -sSL https://get.docker.com | sh
-sudo usermod -aG docker $USER
-
-to run:
-sudo ./run.sh --host 0.0.0.0 --port 5000 --load-only fa,en
-
-
-## run the libretranslate 
-1. activate local environment 
-2. libretranslate --host 0.0.0.0 --port 5000 #--cors-origins "*"
-
-# the app
+# Installation
 1. clone the rep
 2. install nodejs
-sudo apt install nodejs
-sudo apt install npm
+  sudo apt install nodejs
+  sudo apt install npm
 3. install vite locally
-npm install vite --save-dev
+  npm install vite --save-dev
+4. Using terminal go to your repository.
+5. initialize the dev project
+  npm i
+6. run the dev project
+  npm run dev
+7. IT IS NOT YET READY FOR PUBLISHING :D
 
-to the package.json add: "serve" : "vite preview"
+## Prerequisite docker installation
+1. curl -sSL https://get.docker.com | sh
+2. sudo usermod -aG docker $USER
+3. sudo ./run.sh --host 0.0.0.0 --port 5000 --load-only fa,en
 
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "build:dev": "vite build --mode development",
-    "lint": "eslint .",
-    "preview": "vite preview",
-    "serve" : "vite preview"
-  },
+## Prerequisite install libretranslate 
+1. Activate local environment 
+2. Libretranslate --host 0.0.0.0 --port 5000 #--cors-origins "*"
 
-4. if errored : uninstall vit. npm uninstall vit
+
+## Debugging: 
+make sure vit is installed.
+otherwise, uninstall vit. npm uninstall vit
 npm run build
 
-if Vite is installed locally:
+if Vite is installed locally (in your environment):
     npx vite preview
-if Vite is installed globally
+if Vite is installed globally (on your system):
     vite preview
-finish
 
 ##########
-Follow these steps:
+MIT License
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+Copyright (c) 2025 Mehdi Ramezani
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
+Permission is hereby granted, free of charge, to any person obtaining a copy.
